@@ -7,8 +7,6 @@
 // ------------------------------
 // Main draw function for lose screen
 // ------------------------------
-// drawLose() is called from main.js
-// only when currentScreen === "lose"
 function drawLose() {
   // Red-tinted background to communicate failure
   background(255, 210, 210);
@@ -16,20 +14,35 @@ function drawLose() {
   fill(0);
   textAlign(CENTER, CENTER);
 
-  // Main message
   textSize(40);
-  text("You Lose!", width / 2, 300);
+  text("Bad Ending", width / 2, 240);
 
-  // Instruction text
-  textSize(20);
-  text("Click or press R to return to Start.", width / 2, 360);
+  textSize(22);
+
+  // Ending text changes based on Trust stat
+  if (trust < 0) {
+    text(
+      "You ignored others when they needed help.\n" +
+        "When you needed someone, no one was there.",
+      width / 2,
+      320,
+    );
+  } else {
+    text(
+      "Your choices led to an unfortunate outcome.\n" +
+        "Some chances do not come twice.",
+      width / 2,
+      320,
+    );
+  }
+
+  textSize(18);
+  text("Click or press R to return to Start.", width / 2, 400);
 }
 
 // ------------------------------
 // Mouse input for lose screen
 // ------------------------------
-// Any mouse click returns the player to the start screen
-// (no buttons needed for this simple end state)
 function loseMousePressed() {
   currentScreen = "start";
 }
@@ -37,7 +50,6 @@ function loseMousePressed() {
 // ------------------------------
 // Keyboard input for lose screen
 // ------------------------------
-// R is commonly used for “restart” in games
 function loseKeyPressed() {
   if (key === "r" || key === "R") {
     currentScreen = "start";

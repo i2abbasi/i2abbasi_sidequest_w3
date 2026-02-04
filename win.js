@@ -11,8 +11,6 @@
 // ------------------------------------------------------------
 // Main draw function for win screen
 // ------------------------------------------------------------
-// drawWin() is called from main.js
-// only when currentScreen === "win"
 function drawWin() {
   // Green-tinted background to communicate success
   background(200, 255, 200);
@@ -20,19 +18,35 @@ function drawWin() {
   fill(0);
   textAlign(CENTER, CENTER);
 
-  // Main success message
   textSize(40);
-  text("You Win!", width / 2, 300);
+  text("Good Ending", width / 2, 240);
 
-  // Instruction text
-  textSize(20);
-  text("Click or press R to return to Start.", width / 2, 360);
+  textSize(22);
+
+  // Ending text changes based on Trust stat
+  if (trust > 0) {
+    text(
+      "Your choices built trust.\n" +
+        "When it mattered most, others stood by you.",
+      width / 2,
+      320,
+    );
+  } else {
+    text(
+      "Despite the odds, things worked out.\n" +
+        "Not every victory is perfect.",
+      width / 2,
+      320,
+    );
+  }
+
+  textSize(18);
+  text("Click or press R to return to Start.", width / 2, 400);
 }
 
 // ------------------------------------------------------------
 // Mouse input for win screen
 // ------------------------------------------------------------
-// Any mouse click returns the player to the start screen
 function winMousePressed() {
   currentScreen = "start";
 }
@@ -40,7 +54,6 @@ function winMousePressed() {
 // ------------------------------------------------------------
 // Keyboard input for win screen
 // ------------------------------------------------------------
-// R is commonly used for “restart” in games
 function winKeyPressed() {
   if (key === "r" || key === "R") {
     currentScreen = "start";

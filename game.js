@@ -1,128 +1,146 @@
 // NOTE: Do NOT add setup() or draw() in this file
 // setup() and draw() live in main.js
-// This file only defines:
-// 1) drawGame() → what the game screen looks like
-// 2) input handlers → what happens when the player clicks or presses keys
-// 3) helper functions specific to this screen
 
 // ------------------------------
-// Button data
+// Story + player data
 // ------------------------------
-// This object stores all the information needed to draw
-// and interact with the button on the game screen.
-// Keeping this in one object makes it easier to move,
-// resize, or restyle the button later.
-const gameBtn = {
-  x: 400, // x position (centre of the button)
-  y: 550, // y position (centre of the button)
-  w: 260, // width
-  h: 90, // height
-  label: "PRESS HERE", // text shown on the button
+let trust = 0; // player stat that persists across scenes
+
+let storyState = "intro";
+// possible states:
+// "intro" → start of story
+// "help" → player chooses to help
+// "ignore" → player ignores
+// later: "goodEnding", "badEnding"
+
+// ------------------------------
+// Button data (two buttons now)
+// ------------------------------
+const helpBtn = {
+  x: 280,
+  y: 520,
+  w: 240,
+  h: 80,
+  label: "HELP THEM",
+};
+
+const ignoreBtn = {
+  x: 520,
+  y: 520,
+  w: 240,
+  h: 80,
+  label: "IGNORE THEM",
 };
 
 // ------------------------------
-// Main draw function for this screen
+// Main draw function
 // ------------------------------
-// drawGame() is called from main.js *only*
-// when currentScreen === "game"
 function drawGame() {
-  // Set background colour for the game screen
   background(240, 230, 140);
-
-  // ---- Title and instructions text ----
-  fill(0); // black text
-  textSize(32);
+  fill(0);
   textAlign(CENTER, CENTER);
-  text("Game Screen", width / 2, 160);
+
+  textSize(32);
+  text("An Unexpected Choice", width / 2, 120);
 
   textSize(18);
-  text(
-    "Click the button (or press ENTER) for a random result.",
-    width / 2,
-    210,
-  );
 
-  // ---- Draw the button ----
-  // We pass the button object to a helper function
-  drawGameButton(gameBtn);
+  if (storyState === "intro") {
+    text(
+      "You see a stranger struggling on the side of the road.\nThey look nervous. They notice you.",
+      width / 2,
+      230,
+    );
 
-  // ---- Cursor feedback ----
-  // If the mouse is over the button, show a hand cursor
-  // Otherwise, show the normal arrow cursor
-  cursor(isHover(gameBtn) ? HAND : ARROW);
+    drawGameButton(helpBtn);
+    drawGameButton(ignoreBtn);
+  }
+
+  if (storyState === "help") {
+    text(
+      "You stop to help them.\nThey seem relieved.\n\nTrust increased.",
+      width / 2,
+      250,
+    );
+
+    textSize(16);
+    text("Press ENTER to continue.", width / 2, 340);
+  }
+
+  if (storyState === "ignore") {
+    text(
+      "You walk past without stopping.\nThey watch you leave.\n\nTrust decreased.",
+      width / 2,
+      250,
+    );
+
+    textSize(16);
+    text("Press ENTER to continue.", width / 2, 340);
+  }
+
+  // show stat on screen
+  textSize(16);
+  textAlign(LEFT, TOP);
+  text("Trust: " + trust, 20, 20);
+
+  // cursor feedback
+  cursor(isHover(helpBtn) || isHover(ignoreBtn) ? HAND : ARROW);
 }
 
 // ------------------------------
 // Button drawing helper
 // ------------------------------
-// This function is responsible *only* for drawing the button.
-// It does NOT handle clicks or game logic.
 function drawGameButton({ x, y, w, h, label }) {
   rectMode(CENTER);
-
-  // Check if the mouse is hovering over the button
-  // isHover() is defined in main.js so it can be shared
   const hover = isHover({ x, y, w, h });
 
   noStroke();
+  fill(hover ? color(180, 220, 255, 220) : color(200, 220, 255, 190));
 
-  // Change button colour when hovered
-  // This gives visual feedback to the player
-  fill(
-    hover
-      ? color(180, 220, 255, 220) // lighter blue on hover
-      : color(200, 220, 255, 190), // normal state
-  );
+  rect(x, y, w, h, 14);
 
-  // Draw the button rectangle
-  rect(x, y, w, h, 14); // last value = rounded corners
-
-  // Draw the button text
   fill(0);
-  textSize(28);
+  textSize(22);
   textAlign(CENTER, CENTER);
   text(label, x, y);
 }
 
 // ------------------------------
-// Mouse input for this screen
+// Mouse input
 // ------------------------------
-// This function is called from main.js
-// only when currentScreen === "game"
 function gameMousePressed() {
-  // Only trigger the outcome if the button is clicked
-  if (isHover(gameBtn)) {
-    triggerRandomOutcome();
+  if (storyState === "intro") {
+    if (isHover(helpBtn)) {
+      trust += 1;
+      storyState = "help";
+    }
+
+    if (isHover(ignoreBtn)) {
+      trust -= 1;
+      storyState = "ignore";
+    }
   }
 }
 
 // ------------------------------
-// Keyboard input for this screen
+// Keyboard input
 // ------------------------------
-// Allows keyboard-only interaction (accessibility + design)
 function gameKeyPressed() {
-  // ENTER key triggers the same behaviour as clicking the button
   if (keyCode === ENTER) {
-    triggerRandomOutcome();
+    advanceStory();
   }
 }
 
 // ------------------------------
-// Game logic: win or lose
+// Story progression logic
 // ------------------------------
-// This function decides what happens next in the game.
-// It does NOT draw anything.
-function triggerRandomOutcome() {
-  // random() returns a value between 0 and 1
-  // Here we use a 50/50 chance:
-  // - less than 0.5 → win
-  // - 0.5 or greater → lose
-  //
-  // You can bias this later, for example:
-  // random() < 0.7 → 70% chance to win
-  if (random() < 0.5) {
-    currentScreen = "win";
-  } else {
-    currentScreen = "lose";
+function advanceStory() {
+  // after first decision, branch endings
+  if (storyState === "help" || storyState === "ignore") {
+    if (trust >= 1) {
+      currentScreen = "win"; // good ending
+    } else {
+      currentScreen = "lose"; // bad ending
+    }
   }
 }
